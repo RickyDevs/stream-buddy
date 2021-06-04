@@ -32,9 +32,79 @@ var camera: Three.PerspectiveCamera,
 	model: Three.Group,
 	face;
 
+var mainMaterial: Three.Material;
+
 const api = { state: 'Idle' };
-const states = [ 'Idle', 'Walking', 'Running', 'Dance', 'Death', 'Sitting', 'Standing' ];
-const emotes = [ 'Jump', 'Yes', 'No', 'Wave', 'Punch', 'ThumbsUp' ];
+
+interface BuddyState {
+	name: string;
+	loopOnce: boolean;
+	fadeInDuration?: number;
+}
+
+//const states = [ 'Idle', 'Walking', 'Running', 'Dance', 'Death', 'Sitting', 'Standing', 'WalkJump'];
+//const emotes = [ 'Jump', 'Yes', 'No', 'Wave', 'Punch', 'ThumbsUp' ];
+
+var buddyStates: {[cmd: string]: BuddyState} = {
+	'idle': {
+		name: 'Idle',
+		loopOnce: false
+	},
+	'walking': {
+		name: 'Walking',
+		loopOnce: false
+	},
+	'running': {
+		name: 'Running',
+		loopOnce: false
+	},
+	'dance': {
+		name: 'Dance',
+		loopOnce: false
+	},
+	'death': {
+		name: 'Death',
+		loopOnce: true
+	},
+	'sitting': {
+		name: 'Sitting',
+		loopOnce: true
+	},
+	'standing': {
+		name: 'Standing',
+		loopOnce: false
+	},
+	'walkjump': {
+		name: 'WalkJump',
+		loopOnce: false
+	},
+	// emotes
+	'jump': {
+		name: 'Jump',
+		loopOnce: true
+	},
+	'yes': {
+		name: 'Yes',
+		loopOnce: true
+	},
+	'no': {
+		name: 'No',
+		loopOnce: true
+	},
+	'wave': {
+		name: 'Wave',
+		loopOnce: true
+	},
+	'punch': {
+		name: 'Punch',
+		loopOnce: true
+	},
+	'thumbsup': {
+		name: 'ThumbsUp',
+		loopOnce: true
+	},
+
+};
 
 
 export function initBuddy() {
@@ -83,7 +153,7 @@ export function initBuddy() {
 
 		bindAnimations(model, gltf.animations);
 
-		//updateMaterials(gltf.parser);
+		updateMaterials(model, gltf.parser);
 
 	}, undefined, function ( e: Error ) {
 
@@ -108,10 +178,7 @@ export function initBuddy() {
 }
 
 export function isActionValid(name: string): boolean {
-	if (states.includes(name)) {
-		return true;
-	}
-	return emotes.includes(name);	
+	return buddyStates.hasOwnProperty(name.toLowerCase());
 }
 
 function bindAnimations(model : Three.Group, animations : Array<Three.AnimationClip>) {
@@ -128,13 +195,17 @@ function bindAnimations(model : Three.Group, animations : Array<Three.AnimationC
 		const action = mixer.clipAction( clip );
 		actions[ clip.name ] = action;
 
-		if ( emotes.indexOf( clip.name ) >= 0 || states.indexOf( clip.name ) >= 4 ) {
-
+		//if ( emotes.indexOf( clip.name ) >= 0 || states.indexOf( clip.name ) >= 4 ) {
+		var buddyState: BuddyState = {name:'', loopOnce: false};
+		for (var state in buddyStates) {
+			if (buddyStates[state].name == clip.name) {
+				buddyState = buddyStates[state];
+			}
+		}
+		if (buddyState.loopOnce) {
 			action.clampWhenFinished = true;
 			action.loop = THREE.LoopOnce;
 
-		} else {
-			console.log('looping animation', clip.name);
 		}
 	}
 	activeAction = actions[api.state];
@@ -143,18 +214,32 @@ function bindAnimations(model : Three.Group, animations : Array<Three.AnimationC
 
 }
 
-function updateMaterials(parser: GLTFParser) {
+function updateMaterials(model: Three.Group, parser: GLTFParser) {
 	var materialPromise: Promise<Array<Three.Material>> = parser.getDependencies('material');
 	materialPromise.then(function(materials: Array<Three.Material>) {
-		var material = materials[1];
+		mainMaterial = materials[1];
+		
+		//mainMaterial.color.setHex(0x358f97);
 		// @ts-ignore
-		//console.log('material.color', material.color);
-		material.color.setHex(0xc0b0e0);
-		material.needsUpdate = true;
-		material.depthWrite = true;
-		//console.log('material.name', material.name);
+		//mainMaterial.color = new THREE.Color(0xd0322d);
 
+		model.traverse(function(visit) {
+			//console.log(visit.type, visit.name);
+
+			/*if (visit.name.startsWith('Head')) {
+				var mesh  = visit as Three.Mesh;
+				console.log(visit.name, JSON.stringify(mesh.material));
+				//mesh.material.needsUpdate = true; // ainMaterial;
+			}*/
+
+			if (visit.name == 'Head_3') {
+				var mesh  = visit as Three.Mesh;
+				mesh.material = mainMaterial;
+			}
+		})
+	
 	});
+
 }
  
 				// states
@@ -209,8 +294,10 @@ function fadeToAction(name: string, duration: number) {
 		return;
 	}
 
+	var actionName = buddyStates[name.toLowerCase()].name;
+	
 	previousAction = activeAction;
-	activeAction = actions[ name ];
+	activeAction = actions[actionName];
 
 	if ( previousAction !== activeAction ) {
 
@@ -263,4 +350,23 @@ function animate() {
 
 export function rotateBy(angle: number) {//vector: Three.Vector2) {
 	model.rotateY(angle * (Math.PI / 180));
+}
+
+var supportedColors = {
+	'pink': 0xff3399,
+	'blue': 0x3944bc,
+	'red':  0xd0322d
+}
+
+export function changeColor(color: string) {
+	var materialColor = 0;
+	var sanitizedColor = color.trim().toLowerCase();
+	if (supportedColors.hasOwnProperty(sanitizedColor)) {
+		materialColor = supportedColors[sanitizedColor];
+	}
+	console.log(color, materialColor);
+	if (materialColor > 0) {
+		// @ts-ignore
+		mainMaterial.color.setHex(materialColor);
+	}
 }

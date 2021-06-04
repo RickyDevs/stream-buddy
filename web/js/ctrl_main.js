@@ -55,6 +55,7 @@ function echoHandlePageLoad() {
     setGuiConnected(false);
     document.getElementById('disconnect').onclick = doDisconnect;
     document.getElementById('send').onclick = doSend;
+    connectToTwitch();
 }
 function initializeLocation() {
     // See if the location was passed in.
@@ -203,4 +204,18 @@ function clearLog() {
   }
 }
 */
+function connectToTwitch() {
+    ComfyJS.onCommand = (user, command, message, flags, extra) => {
+        if (command === "robot") {
+            if (!message) {
+                message = 'wave';
+            }
+            logTextToConsole('SENT: ' + message);
+            if (websocket) {
+                websocket.send(message);
+            }
+        }
+    };
+    ComfyJS.Init("rickydevs");
+}
 window.addEventListener('load', echoHandlePageLoad, false);

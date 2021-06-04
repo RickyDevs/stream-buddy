@@ -1,27 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<title>three.js webgl - skinning and morphing</title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<link type="text/css" rel="stylesheet" href="main.css">
-		<style>
-			p {
-				max-width: 600px;
-				margin-left: auto;
-				margin-right: auto;
-				padding: 0 2em;
-			}
-		</style>
-	</head>
 
-	<body>
-		<div id="info">
-			
-		</div>
+<body>
+  <script src="js/libs/comfy.js"></script>
+  <script src="js/ctrl_main.js"></script>
 
-		<script type="module" src="./js/buddy_ws.js"></script>
-		<script type="module" src="./js/buddy_main.js"></script>
+  <div id="webSocketSupp"> webSocket is Supported</div>
+  <div id="echo">
+    <div id="echo-config" style="float: left;">
+      <strong>Location:</strong><br>
+      <input class="draw-border" id="wsUri" size="35" value="ws://localhost:8080" >
+      <br>
+      
+      <button class="echo-button" id="connect" disabled="">Connect</button>
+      <button class="echo-button" id="disconnect">Disconnect</button>
+      <br>
+      <br>
+      <strong>Message:</strong><br>
+      <input class="draw-border" id="sendMessage" size="35" value="Rock it with HTML5 WebSocket">
+      <br>
+      <button class="echo-button" id="send">Send</button>
+    </div>
+    <div id="echo-log" style="float: left; margin-left: 20px; padding-left: 20px; width: 350px; border-left: solid 1px #cccccc;"> <strong>Log:</strong>
+      <div id="consoleLog">
+                
+        </div>
+      <button class="echo-button" id="clearLogBut" style="position: relative; top: 3px;">Clear log</button>
+    </div>
+  </div>
 
-	</body>
-</html>
+  
+</body>

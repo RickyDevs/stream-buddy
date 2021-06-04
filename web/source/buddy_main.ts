@@ -1,18 +1,11 @@
 
 
-import { initBuddy, fadeToActionAndRestore, isActionValid, rotateBy } from './buddy_three.js';
+import { initBuddy, fadeToActionAndRestore, isActionValid, rotateBy, changeColor } from './buddy_three.js';
 import { doConnect } from './buddy_ws.js';
 
 function handlePageLoad() {
 
 	initBuddy();
-
-	/*setInterval(() => {
-		console.log('Wave');
-		fadeToActionAndRestore( 'Wave', 0.5 );
-	}, 8000);*/
-
-
 
 	doConnect('ws://192.168.1.18:8080', (command: string) => {
 		console.log(command);
@@ -20,10 +13,17 @@ function handlePageLoad() {
 		if (isActionValid(cmd)) {
 			fadeToActionAndRestore(cmd, 0.2);
 		} else {
-			if (command.startsWith('Rotate')) {
+			if (command.startsWith('rotate')) {
 				var param = command.split(' ');
 
 				rotateBy(parseInt(param[1]));
+
+				return;
+			} 
+			if (command.startsWith('color')) {
+				var param = command.split(' ');
+
+				changeColor(param[1]);
 
 				return;
 			} 
@@ -32,6 +32,8 @@ function handlePageLoad() {
 			fadeToActionAndRestore("No", 0.4);
 		}
 	});
+
+
 }
 
 window.addEventListener('load', handlePageLoad, false);

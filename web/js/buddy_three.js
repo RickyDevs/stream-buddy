@@ -7,9 +7,69 @@ import { GLTFLoader } from './libs/jsm/loaders/GLTFLoader.js';
 ;
 var container, clock, mixer, actions, activeAction, previousAction;
 var camera, scene, renderer, model, face;
+var mainMaterial;
 const api = { state: 'Idle' };
-const states = ['Idle', 'Walking', 'Running', 'Dance', 'Death', 'Sitting', 'Standing'];
-const emotes = ['Jump', 'Yes', 'No', 'Wave', 'Punch', 'ThumbsUp'];
+//const states = [ 'Idle', 'Walking', 'Running', 'Dance', 'Death', 'Sitting', 'Standing', 'WalkJump'];
+//const emotes = [ 'Jump', 'Yes', 'No', 'Wave', 'Punch', 'ThumbsUp' ];
+var buddyStates = {
+    'idle': {
+        name: 'Idle',
+        loopOnce: false
+    },
+    'walking': {
+        name: 'Walking',
+        loopOnce: false
+    },
+    'running': {
+        name: 'Running',
+        loopOnce: false
+    },
+    'dance': {
+        name: 'Dance',
+        loopOnce: false
+    },
+    'death': {
+        name: 'Death',
+        loopOnce: true
+    },
+    'sitting': {
+        name: 'Sitting',
+        loopOnce: true
+    },
+    'standing': {
+        name: 'Standing',
+        loopOnce: false
+    },
+    'walkjump': {
+        name: 'WalkJump',
+        loopOnce: false
+    },
+    // emotes
+    'jump': {
+        name: 'Jump',
+        loopOnce: true
+    },
+    'yes': {
+        name: 'Yes',
+        loopOnce: true
+    },
+    'no': {
+        name: 'No',
+        loopOnce: true
+    },
+    'wave': {
+        name: 'Wave',
+        loopOnce: true
+    },
+    'punch': {
+        name: 'Punch',
+        loopOnce: true
+    },
+    'thumbsup': {
+        name: 'ThumbsUp',
+        loopOnce: true
+    },
+};
 export function initBuddy() {
     container = document.createElement('div');
     document.body.appendChild(container);
@@ -41,7 +101,7 @@ export function initBuddy() {
         model = gltf.scene;
         scene.add(model);
         bindAnimations(model, gltf.animations);
-        //updateMaterials(gltf.parser);
+        updateMaterials(model, gltf.parser);
     }, undefined, function (e) {
         console.error(e);
     });
@@ -58,10 +118,7 @@ export function initBuddy() {
     animate();
 }
 export function isActionValid(name) {
-    if (states.includes(name)) {
-        return true;
-    }
-    return emotes.includes(name);
+    return buddyStates.hasOwnProperty(name.toLowerCase());
 }
 function bindAnimations(model, animations) {
     mixer = new THREE.AnimationMixer(model);
@@ -71,27 +128,40 @@ function bindAnimations(model, animations) {
         const clip = animations[i];
         const action = mixer.clipAction(clip);
         actions[clip.name] = action;
-        if (emotes.indexOf(clip.name) >= 0 || states.indexOf(clip.name) >= 4) {
+        //if ( emotes.indexOf( clip.name ) >= 0 || states.indexOf( clip.name ) >= 4 ) {
+        var buddyState = { name: '', loopOnce: false };
+        for (var state in buddyStates) {
+            if (buddyStates[state].name == clip.name) {
+                buddyState = buddyStates[state];
+            }
+        }
+        if (buddyState.loopOnce) {
             action.clampWhenFinished = true;
             action.loop = THREE.LoopOnce;
-        }
-        else {
-            console.log('looping animation', clip.name);
         }
     }
     activeAction = actions[api.state];
     activeAction.play();
 }
-function updateMaterials(parser) {
+function updateMaterials(model, parser) {
     var materialPromise = parser.getDependencies('material');
     materialPromise.then(function (materials) {
-        var material = materials[1];
+        mainMaterial = materials[1];
+        //mainMaterial.color.setHex(0x358f97);
         // @ts-ignore
-        //console.log('material.color', material.color);
-        material.color.setHex(0xc0b0e0);
-        material.needsUpdate = true;
-        material.depthWrite = true;
-        //console.log('material.name', material.name);
+        //mainMaterial.color = new THREE.Color(0xd0322d);
+        model.traverse(function (visit) {
+            //console.log(visit.type, visit.name);
+            /*if (visit.name.startsWith('Head')) {
+                var mesh  = visit as Three.Mesh;
+                console.log(visit.name, JSON.stringify(mesh.material));
+                //mesh.material.needsUpdate = true; // ainMaterial;
+            }*/
+            if (visit.name == 'Head_3') {
+                var mesh = visit;
+                mesh.material = mainMaterial;
+            }
+        });
     });
 }
 // states
@@ -142,8 +212,9 @@ function fadeToAction(name, duration) {
     if (!mixer) {
         return;
     }
+    var actionName = buddyStates[name.toLowerCase()].name;
     previousAction = activeAction;
-    activeAction = actions[name];
+    activeAction = actions[actionName];
     if (previousAction !== activeAction) {
         previousAction.fadeOut(duration);
     }
@@ -177,4 +248,21 @@ function animate() {
 }
 export function rotateBy(angle) {
     model.rotateY(angle * (Math.PI / 180));
+}
+var supportedColors = {
+    'pink': 0xff3399,
+    'blue': 0x3944bc,
+    'red': 0xd0322d
+};
+export function changeColor(color) {
+    var materialColor = 0;
+    var sanitizedColor = color.trim().toLowerCase();
+    if (supportedColors.hasOwnProperty(sanitizedColor)) {
+        materialColor = supportedColors[sanitizedColor];
+    }
+    console.log(color, materialColor);
+    if (materialColor > 0) {
+        // @ts-ignore
+        mainMaterial.color.setHex(materialColor);
+    }
 }

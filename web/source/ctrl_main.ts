@@ -70,6 +70,9 @@ function echoHandlePageLoad() {
   document.getElementById('disconnect').onclick = doDisconnect;
   document.getElementById('send').onclick = doSend;
 
+
+
+  connectToTwitch();
 }
 
 function initializeLocation() {
@@ -243,5 +246,22 @@ function clearLog() {
   }
 }
 */
+
+
+function connectToTwitch() {
+    ComfyJS.onCommand = ( user, command, message, flags, extra ) => {
+		if (command === "robot") {
+			if (!message) {
+				message = 'wave';
+			}
+			logTextToConsole('SENT: ' + message);
+			if (websocket) {
+				websocket.send(message);
+			}
+		}
+	}
+	ComfyJS.Init( "rickydevs" );
+
+}
 
 window.addEventListener('load', echoHandlePageLoad, false);
