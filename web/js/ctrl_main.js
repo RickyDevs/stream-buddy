@@ -212,9 +212,15 @@ function connectToTwitch() {
             }
             logTextToConsole('SENT: ' + message);
             if (websocket) {
-                websocket.send(message);
+                websocket.send(JSON.stringify({
+                    from: user,
+                    cmd: message
+                }));
             }
         }
+    };
+    ComfyJS.onConnected = function (address, port, isFirstConnect) {
+        logElementToConsole('connected to twitch');
     };
     ComfyJS.Init("rickydevs");
 }

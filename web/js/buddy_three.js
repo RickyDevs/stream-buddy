@@ -70,9 +70,7 @@ var buddyStates = {
         loopOnce: true
     },
 };
-export function initBuddy() {
-    container = document.createElement('div');
-    document.body.appendChild(container);
+export function initBuddy(container) {
     camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.25, 100);
     camera.position.set(0, 2.2, 20);
     camera.lookAt(new THREE.Vector3(0, 2, 0));
@@ -147,21 +145,25 @@ function updateMaterials(model, parser) {
     var materialPromise = parser.getDependencies('material');
     materialPromise.then(function (materials) {
         mainMaterial = materials[1];
+        var faceMesh = model.getObjectByName('Head_3');
+        faceMesh.material = mainMaterial;
         //mainMaterial.color.setHex(0x358f97);
         // @ts-ignore
         //mainMaterial.color = new THREE.Color(0xd0322d);
-        model.traverse(function (visit) {
+        /*model.traverse(function(visit) {
             //console.log(visit.type, visit.name);
-            /*if (visit.name.startsWith('Head')) {
-                var mesh  = visit as Three.Mesh;
-                console.log(visit.name, JSON.stringify(mesh.material));
-                //mesh.material.needsUpdate = true; // ainMaterial;
-            }*/
+
+            //if (visit.name.startsWith('Head')) {
+            //	var mesh  = visit as Three.Mesh;
+            //	console.log(visit.name, JSON.stringify(mesh.material));
+            //	//mesh.material.needsUpdate = true; // ainMaterial;
+            //}
+
             if (visit.name == 'Head_3') {
-                var mesh = visit;
-                mesh.material = mainMaterial;
+                var mesh  = visit;
+                
             }
-        });
+        })*/
     });
 }
 // states

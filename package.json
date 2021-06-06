@@ -13,8 +13,10 @@
     "ws": "^7.4.6"
   },
   "devDependencies": {
-    "@types/ws": "^7.4.4",
     "@types/node": "^15.6.1",
-    "@types/three": "^0.128.0"
+    "@types/qunit": "^2.11.1",
+    "@types/three": "^0.128.0",
+    "@types/ws": "^7.4.4",
+    "qunit": "2.11.1"
   }
 }
