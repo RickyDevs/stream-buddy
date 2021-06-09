@@ -16,11 +16,11 @@ var buddyStates = {
         name: 'Idle',
         loopOnce: false
     },
-    'walking': {
+    'walk': {
         name: 'Walking',
         loopOnce: false
     },
-    'running': {
+    'run': {
         name: 'Running',
         loopOnce: false
     },

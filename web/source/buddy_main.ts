@@ -1,35 +1,26 @@
 
 
 import { initBuddy, fadeToActionAndRestore, isActionValid, rotateBy, changeColor } from './buddy_three.js';
-import { doConnect } from './buddy_ws.js';
+import { doConnect, MessageProcessor } from './buddy_ws.js';
 
 interface Command {
 	from: string;
 	cmd: string;
 }
 
-function specialCommand(command: Command): boolean {
-	var cmd = command.cmd.trim();
-	if (cmd.startsWith('rotate ')) {
-		var param = cmd.split(' ');
-
-		rotateBy(parseInt(param[1]));
-
-		return true;
-	} 
-	if (cmd.startsWith('color ')) {
-		var param = cmd.split(' ');
-
-		changeColor(param[1]);
-
-		return true;
+export class BuddyHandler {
+	constructor() {
 	}
-
-	if (cmd.startsWith('hello')) {
+	isActionValid(cmd: string): boolean {
+		return isActionValid(cmd);
+	}
+	fadeToActionAndRestore(cmd: string, timeout: number): void {
+		fadeToActionAndRestore(cmd, timeout);
+	}
+	showBubble(bubbleText: string) {
 		var bubble = document.getElementById('buddy_bubble');
-		bubble.innerText = 'Hello ' + command.from + '!';
+		bubble.innerText = bubbleText;
 
-		fadeToActionAndRestore('wave', 0.2);
 		setTimeout(function() {
 			console.log('show hello', bubble.innerText)
 			bubble.style.opacity = "1";
@@ -38,18 +29,23 @@ function specialCommand(command: Command): boolean {
 			console.log('hide hello', bubble.innerText)
 			bubble.style.opacity = "0";
 		}, 4000);
-		return true;
 	}
 
-	return false;
+	changeColor(color: string) {
+		changeColor(color);
+	}
 }
 
 
-function handlePageLoad() {
-	var container = document.getElementById( 'info' );
-	initBuddy(container);
+export class BuddyMessageProcessor extends MessageProcessor {
+	_buddyHandler: BuddyHandler;
 
-	doConnect('ws://192.168.1.18:8080', (data: string) => {
+	constructor(buddyHandler: BuddyHandler) {
+		super();
+		this._buddyHandler = buddyHandler;
+	}
+
+	onMessage(data: string): void {
 		console.log(data);
 		var command = {
 			from: '',
@@ -61,17 +57,62 @@ function handlePageLoad() {
 
 		var cmd = command.cmd.trim();
 
+		if (!cmd) {
+			command.cmd = cmd = 'hello';
+		}
 
-		if (isActionValid(cmd)) {
-			fadeToActionAndRestore(cmd, 0.2);
+		if (this._buddyHandler.isActionValid(cmd)) {
+			this._buddyHandler.fadeToActionAndRestore(cmd, 0.2);
 		} else {
-			if (specialCommand(command)) {
+			if (this.specialCommand(command)) {
 				return;
 			}
 			// on error...
-			fadeToActionAndRestore("No", 0.4);
+			this._buddyHandler.fadeToActionAndRestore("No", 0.4);
 		}
-	});
+	}
+	specialCommand(command: Command): boolean {
+		console.log(command);
+		var cmd = command.cmd.trim();
+		if (cmd.startsWith('rotate ')) {
+			var param = cmd.split(' ');
+
+			rotateBy(parseInt(param[1]));
+
+			return true;
+		} 
+		if (cmd.startsWith('color ')) {
+			var param = cmd.split(' ');
+
+			this._buddyHandler.changeColor(param[1]);
+
+			return true;
+		}
+
+		if (cmd.startsWith('hello')) {
+			this._buddyHandler.fadeToActionAndRestore('wave', 0.2);
+			this._buddyHandler.showBubble('Hello ' + command.from + '!');
+			return true;
+		}
+
+		if (cmd.startsWith('talk')) {
+
+			this._buddyHandler.showBubble(cmd.substr(5));
+			return true;
+		}
+
+		return false;
+	}
+}
+
+function handlePageLoad() {
+	var container = document.getElementById('info');
+	if (!container) {
+		return;
+	}
+
+	initBuddy(container);
+	doConnect('ws://192.168.1.18:8080', new BuddyMessageProcessor(new BuddyHandler()));
 
 	//handleBubble()
 

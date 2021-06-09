@@ -7,72 +7,79 @@ var disconnectBut;
 var sendMessage;
 var sendBut;
 var clearLogBut;
+var websocket;
 
 function echoHandlePageLoad() {
-  if (window.WebSocket) {
-    document.getElementById('webSocketSupp').style.display = 'block';
-  }
-  else {
-    document.getElementById('noWebSocketSupp').style.display = 'block';
-  }
+	if (document.getElementById('webSocketSupp') == undefined) {
+		return;
+  	}
+	// @ts-ignore
+	if (window.WebSocket) {
+		document.getElementById('webSocketSupp').style.display = 'block';
+	}
+	else {
+		document.getElementById('noWebSocketSupp').style.display = 'block';
+	}
 
-  //    secureCb = document.getElementById('secureCb');
-  //    secureCb.checked = false;
-  //    secureCb.onclick = toggleTlS;
+	//    secureCb = document.getElementById('secureCb');
+	//    secureCb.checked = false;
+	//    secureCb.onclick = toggleTlS;
 
-  //    secureCbLabel = document.getElementById('secureCbLabel')
+	//    secureCbLabel = document.getElementById('secureCbLabel')
 
-  wsUri = document.getElementById('wsUri');
-  //initializeLocation();
+	wsUri = document.getElementById('wsUri');
+	//initializeLocation();
 
-  // Connect if the user presses enter in the connect field.
-  wsUri.onkeypress = function (e) {
-    if (!e) {
-      e = window.event;
-    }
-    var keyCode = e.keyCode || e.which;
-    if (keyCode == '13') {
-      doConnect();
-      return false;
-    }
-  }
+	// Connect if the user presses enter in the connect field.
+	wsUri.onkeypress = function (e) {
+		if (!e) {
+		e = window.event;
+		}
+		var keyCode = e.keyCode || e.which;
+		if (keyCode == '13') {
+		doConnect();
+		return false;
+		}
+	}
 
-  connectBut = document.getElementById('connect');
-  connectBut.onclick = doConnect;
+	connectBut = document.getElementById('connect');
+	connectBut.onclick = doConnect;
 
-  disconnectBut = document.getElementById('disconnect');
-  disconnectBut.onclick = doDisconnect;
+	disconnectBut = document.getElementById('disconnect');
+	disconnectBut.onclick = doDisconnect;
 
-  sendMessage = document.getElementById('sendMessage');
+	sendMessage = document.getElementById('sendMessage');
 
-  // Send message if the user presses enter in the the sendMessage field.
-  sendMessage.onkeypress = function (e) {
-    if (!e) {
-      e = window.event;
-    }
-    var keyCode = e.keyCode || e.which;
-    if (keyCode == '13') {
-      doSend();
-      return false;
-    }
-  }
+	// Send message if the user presses enter in the the sendMessage field.
+	sendMessage.onkeypress = function (e) {
+		if (!e) {
+		e = window.event;
+		}
+		var keyCode = e.keyCode || e.which;
+		if (keyCode == '13') {
+		doSend();
+		return false;
+		}
+	}
 
-  sendBut = document.getElementById('send');
-  sendBut.onclick = doSend;
+	sendBut = document.getElementById('send');
+	sendBut.onclick = doSend;
 
-  consoleLog = document.getElementById('consoleLog');
+	consoleLog = document.getElementById('consoleLog');
 
-  clearLogBut = document.getElementById('clearLogBut');
-  clearLogBut.onclick = clearLog;
+	clearLogBut = document.getElementById('clearLogBut');
+	clearLogBut.onclick = clearLog;
 
-  setGuiConnected(false);
+	setGuiConnected(false);
 
-  document.getElementById('disconnect').onclick = doDisconnect;
-  document.getElementById('send').onclick = doSend;
+	document.getElementById('disconnect').onclick = doDisconnect;
+	document.getElementById('send').onclick = doSend;
 
 
+	setTimeout(() => {
 
-  connectToTwitch();
+		connectToTwitch();
+	}, 1000);
 }
 
 function initializeLocation() {
@@ -103,7 +110,7 @@ function initializeLocation() {
 }
 */
 
-function getParameterByName(name, url) {
+function getParameterByName(name: string, url?: string) {
   if (!url) url = window.location.href;
   name = name.replace(/[\[\]]/g, '\\$&');
   var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)', 'i'),
@@ -116,10 +123,13 @@ function getParameterByName(name, url) {
 function doConnect() {
 
     console.log('do Connect');
+    // @ts-ignore
     if (window.MozWebSocket) {
       logErrorToConsole('Info', 'This browser supports WebSocket using the MozWebSocket constructor');
+      // @ts-ignore
       window.WebSocket = window.MozWebSocket;
     }
+    // @ts-ignore
     else if (!window.WebSocket) {
       logErrorToConsole('ERROR', 'This browser does not have support for WebSocket');
       return;
@@ -140,98 +150,98 @@ function doConnect() {
 }
 
 function doDisconnect() {
-  websocket.close()
+  	websocket.close()
 }
 
 function doSend() {
-  logTextToConsole('SENT: ' + sendMessage.value);
-  websocket.send(sendMessage.value);
+  	logTextToConsole('SENT: ' + sendMessage.value);
+ 	websocket.send(sendMessage.value);
 }
 
 function logTextToConsole(text) {
-  console.log(text)
-  var span = document.createTextNode(text);
-  logElementToConsole(span);
+  	console.log(text)
+  	var span = document.createTextNode(text);
+  	logElementToConsole(span);
 }
 
 // label is a string like 'Info' or 'Error'.
-function logErrorToConsole(label, text) {
-  var span = document.createElement('span');
-  span.style.wordWrap = 'break-word';
-  span.style.color = 'red';
-  span.innerHTML = '<strong>' + label + ':</strong> ';
+function logErrorToConsole(label: string, text: string) {
+	var span = document.createElement('span');
+	span.style.wordWrap = 'break-word';
+	span.style.color = 'red';
+	span.innerHTML = '<strong>' + label + ':</strong> ';
 
-  var text = document.createTextNode(text);
-  span.appendChild(text);
+	var textNode = document.createTextNode(text);
+	span.appendChild(textNode);
 
-  logElementToConsole(span);
+	logElementToConsole(span);
 }
 
 function logElementToConsole(element) {
 
-  var p = document.createElement('p');
-  p.style.wordWrap = 'break-word';
-  //    p.innerHTML = getSecureTag();
-  p.appendChild(element);
+	var p = document.createElement('p');
+	p.style.wordWrap = 'break-word';
+	//    p.innerHTML = getSecureTag();
+	p.appendChild(element);
 
-  consoleLog.appendChild(p);
+	consoleLog.appendChild(p);
 
-  while (consoleLog.childNodes.length > 50) {
-    consoleLog.removeChild(consoleLog.firstChild);
-  }
+	while (consoleLog.childNodes.length > 50) {
+		consoleLog.removeChild(consoleLog.firstChild);
+	}
 
-  consoleLog.scrollTop = consoleLog.scrollHeight;
+	consoleLog.scrollTop = consoleLog.scrollHeight;
 }
 
 function onOpen(evt) {
-  logTextToConsole('CONNECTED');
-  setGuiConnected(true);
+	logTextToConsole('CONNECTED');
+	setGuiConnected(true);
 
-  // For convenience, put the cursor in the message field, and at the end of the text.
-  sendMessage.focus();
-  sendMessage.selectionStart = sendMessage.selectionEnd = sendMessage.value.length;
+	// For convenience, put the cursor in the message field, and at the end of the text.
+	sendMessage.focus();
+	sendMessage.selectionStart = sendMessage.selectionEnd = sendMessage.value.length;
 }
 
 function onClose(evt) {
-  logTextToConsole('DISCONNECTED');
-  setGuiConnected(false);
+	logTextToConsole('DISCONNECTED');
+	setGuiConnected(false);
 }
 
 function onMessage(evt) {
-  var span = document.createElement('span');
-  span.style.wordWrap = 'break-word';
-  span.style.color = 'blue';
-  span.innerHTML = 'RECEIVED: ';
+	var span = document.createElement('span');
+	span.style.wordWrap = 'break-word';
+	span.style.color = 'blue';
+	span.innerHTML = 'RECEIVED: ';
 
-  var message = document.createTextNode(evt.data);
-  span.appendChild(message);
+	var message = document.createTextNode(evt.data);
+	span.appendChild(message);
 
-  logElementToConsole(span);
+	logElementToConsole(span);
 }
 
 function onError(evt) {
-  logErrorToConsole('ERROR', evt.data);
+  	logErrorToConsole('ERROR', evt.data);
 }
 
 function setGuiConnected(isConnected) {
-  wsUri.disabled = isConnected;
-  connectBut.disabled = isConnected;
-  disconnectBut.disabled = !isConnected;
-  sendMessage.disabled = !isConnected;
-  sendBut.disabled = !isConnected;
-  //    secureCb.disabled = isConnected;
-  var labelColor = 'black';
-  if (isConnected) {
-    labelColor = '#999999';
-  }
-  //    secureCbLabel.style.color = labelColor;
+	wsUri.disabled = isConnected;
+	connectBut.disabled = isConnected;
+	disconnectBut.disabled = !isConnected;
+	sendMessage.disabled = !isConnected;
+	sendBut.disabled = !isConnected;
+	//    secureCb.disabled = isConnected;
+	var labelColor = 'black';
+	if (isConnected) {
+		labelColor = '#999999';
+	}
+	//    secureCbLabel.style.color = labelColor;
 
 }
 
 function clearLog() {
-  while (consoleLog.childNodes.length > 0) {
-    consoleLog.removeChild(consoleLog.lastChild);
-  }
+	while (consoleLog.childNodes.length > 0) {
+		consoleLog.removeChild(consoleLog.lastChild);
+	}
 }
 
 /*  function getSecureTag()
@@ -247,27 +257,45 @@ function clearLog() {
 }
 */
 
+class CommandProcessor {
+	_websocket: any;
+	
+	constructor(websocket: any) {
+		this._websocket = websocket;
+	}
 
-function connectToTwitch() {
-    ComfyJS.onCommand = ( user, command, message, flags, extra ) => {
+	send(user, command, message, flags?, extra?): void {
 		if (command === "robot") {
-			if (!message) {
-				message = 'wave';
-			}
-			logTextToConsole('SENT: ' + message);
-			if (websocket) {
-				websocket.send(JSON.stringify({
-          from: user, 
-          cmd: message
-        }));
+			if (this._websocket) {
+				this._websocket.send(JSON.stringify({
+					from: user, 
+					cmd: message
+				}));
 			}
 		}
-  }
-  ComfyJS.onConnected = function(address, port, isFirstConnect) {
-    logElementToConsole('connected to twitch')
-  }
+	}
+}
+
+
+function connectToTwitch() {
+	var _command: CommandProcessor;
+    // @ts-ignore
+    ComfyJS.onCommand = ( user, command, message, flags, extra ) => {
+		if (!_command) {
+			_command = new CommandProcessor(websocket);
+		}
+		_command.send(user, command, message, flags, extra);
+		logTextToConsole('SENT: ' + message);
+	};
+  
+	// @ts-ignore
+	ComfyJS.onConnected = function(address, port, isFirstConnect) {
+    	logTextToConsole('connected to twitch')
+  	}
+	// @ts-ignore
 	ComfyJS.Init( "rickydevs" );
 
 }
 
 window.addEventListener('load', echoHandlePageLoad, false);
+

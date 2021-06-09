@@ -3,12 +3,21 @@
 var websocket: WebSocket;
 var tryReopen = 0;
 
-var messageCallback: (command: string) => void
+export abstract class MessageProcessor {
+    constructor() {
+    }
 
-export function doConnect(uri: string, messageCb: (command: string) => void) {
+    abstract onMessage(msg: string): void; 
+}
 
-	if (messageCb) {
-        messageCallback = messageCb;
+
+var _messageProcessor: MessageProcessor;
+
+
+export function doConnect(uri: string, messageProcessor: MessageProcessor) {
+
+	if (messageProcessor) {
+        _messageProcessor = messageProcessor;
     }
     
     console.log('do Connect', uri);
@@ -17,7 +26,9 @@ export function doConnect(uri: string, messageCb: (command: string) => void) {
         console.info('This browser supports WebSocket using the MozWebSocket constructor');
         // @ts-ignore
         window.WebSocket = window.MozWebSocket;
-    }
+    
+    } 
+    // @ts-ignore
     else if (!window.WebSocket) {
         console.error('This browser does not have support for WebSocket');
         return;
@@ -58,7 +69,7 @@ function onError(event: Event) {
 }
 
 function onMessage(event: MessageEvent) {
-    if ((typeof event.data == 'string') && messageCallback) {
-		messageCallback(event.data);
+    if ((typeof event.data == 'string') && _messageProcessor) {
+		_messageProcessor.onMessage(event.data);
     }
 }

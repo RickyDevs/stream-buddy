@@ -7,7 +7,12 @@ var disconnectBut;
 var sendMessage;
 var sendBut;
 var clearLogBut;
+var websocket;
 function echoHandlePageLoad() {
+    if (document.getElementById('webSocketSupp') == undefined) {
+        return;
+    }
+    // @ts-ignore
     if (window.WebSocket) {
         document.getElementById('webSocketSupp').style.display = 'block';
     }
@@ -55,7 +60,9 @@ function echoHandlePageLoad() {
     setGuiConnected(false);
     document.getElementById('disconnect').onclick = doDisconnect;
     document.getElementById('send').onclick = doSend;
-    connectToTwitch();
+    setTimeout(() => {
+        connectToTwitch();
+    }, 1000);
 }
 function initializeLocation() {
     // See if the location was passed in.
@@ -96,10 +103,13 @@ function getParameterByName(name, url) {
 }
 function doConnect() {
     console.log('do Connect');
+    // @ts-ignore
     if (window.MozWebSocket) {
         logErrorToConsole('Info', 'This browser supports WebSocket using the MozWebSocket constructor');
+        // @ts-ignore
         window.WebSocket = window.MozWebSocket;
     }
+    // @ts-ignore
     else if (!window.WebSocket) {
         logErrorToConsole('ERROR', 'This browser does not have support for WebSocket');
         return;
@@ -136,8 +146,8 @@ function logErrorToConsole(label, text) {
     span.style.wordWrap = 'break-word';
     span.style.color = 'red';
     span.innerHTML = '<strong>' + label + ':</strong> ';
-    var text = document.createTextNode(text);
-    span.appendChild(text);
+    var textNode = document.createTextNode(text);
+    span.appendChild(textNode);
     logElementToConsole(span);
 }
 function logElementToConsole(element) {
@@ -204,24 +214,36 @@ function clearLog() {
   }
 }
 */
-function connectToTwitch() {
-    ComfyJS.onCommand = (user, command, message, flags, extra) => {
+class CommandProcessor {
+    constructor(websocket) {
+        this._websocket = websocket;
+    }
+    send(user, command, message, flags, extra) {
         if (command === "robot") {
-            if (!message) {
-                message = 'wave';
-            }
-            logTextToConsole('SENT: ' + message);
-            if (websocket) {
-                websocket.send(JSON.stringify({
+            if (this._websocket) {
+                this._websocket.send(JSON.stringify({
                     from: user,
                     cmd: message
                 }));
             }
         }
+    }
+}
+function connectToTwitch() {
+    var _command;
+    // @ts-ignore
+    ComfyJS.onCommand = (user, command, message, flags, extra) => {
+        if (!_command) {
+            _command = new CommandProcessor(websocket);
+        }
+        _command.send(user, command, message, flags, extra);
+        logTextToConsole('SENT: ' + message);
     };
+    // @ts-ignore
     ComfyJS.onConnected = function (address, port, isFirstConnect) {
-        logElementToConsole('connected to twitch');
+        logTextToConsole('connected to twitch');
     };
+    // @ts-ignore
     ComfyJS.Init("rickydevs");
 }
 window.addEventListener('load', echoHandlePageLoad, false);
