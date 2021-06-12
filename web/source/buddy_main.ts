@@ -3,6 +3,9 @@
 import { initBuddy, fadeToActionAndRestore, isActionValid, rotateBy, changeColor } from './buddy_three.js';
 import { doConnect, MessageProcessor } from './buddy_ws.js';
 
+
+var wsBuddy = 'ws://192.168.1.18:8081/ws';
+
 interface Command {
 	from: string;
 	cmd: string;
@@ -15,11 +18,16 @@ export class BuddyHandler {
 		return isActionValid(cmd);
 	}
 	fadeToActionAndRestore(cmd: string, timeout: number): void {
+		console.log(cmd)
 		fadeToActionAndRestore(cmd, timeout);
 	}
-	showBubble(bubbleText: string) {
+	showBubble(bubbleText: string, html?: boolean) {
 		var bubble = document.getElementById('buddy_bubble');
-		bubble.innerText = bubbleText;
+		if (html) {
+			bubble.innerHTML = bubbleText;
+		} else {
+			bubble.innerText = bubbleText;
+		}
 
 		setTimeout(function() {
 			console.log('show hello', bubble.innerText)
@@ -72,7 +80,6 @@ export class BuddyMessageProcessor extends MessageProcessor {
 		}
 	}
 	specialCommand(command: Command): boolean {
-		console.log(command);
 		var cmd = command.cmd.trim();
 		if (cmd.startsWith('rotate ')) {
 			var param = cmd.split(' ');
@@ -95,13 +102,42 @@ export class BuddyMessageProcessor extends MessageProcessor {
 			return true;
 		}
 
-		if (cmd.startsWith('talk')) {
+		if (cmd.startsWith('talk ')) {
+			var talkText = cmd.substr(5).trim();
+			if ((talkText.length > 0) && !talkText.includes('<') && !talkText.includes('>')) {
+				this._buddyHandler.showBubble(talkText.substr(0,1).toUpperCase() + talkText.substr(1));
+			}
+			return true;
+		}
 
-			this._buddyHandler.showBubble(cmd.substr(5));
+		if (cmd.startsWith('so ')) {
+			var soUser = this.sanitizeUsername(cmd.substr(2));
+			if (soUser.length > 0) {
+				this._buddyHandler.fadeToActionAndRestore('thumbsup', 0.2);
+		
+				this._buddyHandler.showBubble(`Partilhem o apoio com o streamer <b>${soUser}</b>! Vão lá e façam follow!`, true);
+			}
+			return true;
+		}
+
+		if (cmd.startsWith('ola ')) {
+			var olaUser = this.sanitizeUsername(cmd.substr(3));
+			if (olaUser.length > 0) {
+				this._buddyHandler.fadeToActionAndRestore('wave', 0.2);
+				this._buddyHandler.showBubble(`Olá ${olaUser}!`);
+			}
 			return true;
 		}
 
 		return false;
+	}
+
+	private sanitizeUsername(rawUsername: string) {
+		var user = rawUsername.trim();
+		if (user.startsWith('@')) {
+			user = user.substring(1);
+		}
+		return user;
 	}
 }
 
@@ -112,7 +148,7 @@ function handlePageLoad() {
 	}
 
 	initBuddy(container);
-	doConnect('ws://192.168.1.18:8080', new BuddyMessageProcessor(new BuddyHandler()));
+	doConnect(wsBuddy, new BuddyMessageProcessor(new BuddyHandler()));
 
 	//handleBubble()
 

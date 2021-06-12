@@ -9,6 +9,12 @@ var sendBut;
 var clearLogBut;
 var websocket;
 
+
+var PageElements = {
+	CommandList: 'ul#command_list',
+	ClearList: 'button#clear_command_list'
+}
+
 function echoHandlePageLoad() {
 	if (document.getElementById('webSocketSupp') == undefined) {
 		return;
@@ -76,10 +82,14 @@ function echoHandlePageLoad() {
 	document.getElementById('send').onclick = doSend;
 
 
-	setTimeout(() => {
 
+
+	// 
+	setTimeout(() => {
 		connectToTwitch();
 	}, 1000);
+
+	$(PageElements.ClearList).on('click', clearCommandList);
 }
 
 function initializeLocation() {
@@ -160,8 +170,14 @@ function doSend() {
 
 function logTextToConsole(text) {
   	console.log(text)
-  	var span = document.createTextNode(text);
-  	logElementToConsole(span);
+  	//var span = document.createTextNode(text);
+	//logElementToConsole(span);
+	  
+
+	var commandList = $(PageElements.CommandList);
+	//commandList.children().add(createCommandListItem(text));
+	createCommandListItem(text).appendTo(commandList);
+	//console.log(commandList);
 }
 
 // label is a string like 'Info' or 'Error'.
@@ -257,19 +273,57 @@ function clearLog() {
 }
 */
 
+
+
+
+function createCommandListItem(text: string): JQuery<HTMLElement> {
+	var li = $('<li></li>', {
+		class:"list-primary"
+	});
+	var title = $(`<div class="task-title"> <span class="task-title-sp">${text}</span> </div>`);
+	var badge = $('<span class="badge bg-theme">Done</span>');
+	badge.appendTo(title);
+	
+	var controls = $('<div class="pull-right">' +
+					 	'<button class="btn btn-success"></button>' +
+					 	'<button class="btn btn-primary"></button>' +
+					 	'<button class="btn btn-danger"></button>' +
+ 					 '</div>');
+	controls.appendTo(title);
+	title.appendTo(li);
+
+
+	return li;
+}
+
+
+function clearCommandList() {
+	$(PageElements.CommandList).empty();
+}
+
+
 class CommandProcessor {
-	_websocket: any;
+	_comsumer: any;
 	
 	constructor(websocket: any) {
-		this._websocket = websocket;
+		this._comsumer = websocket;
 	}
 
 	send(user, command, message, flags?, extra?): void {
 		if (command === "robot") {
-			if (this._websocket) {
-				this._websocket.send(JSON.stringify({
+			if (this._comsumer) {
+				this._comsumer.send(JSON.stringify({
 					from: user, 
 					cmd: message
+				}));
+			}
+		}
+
+		if (command === "so") {
+			if (this._comsumer) {
+				this._comsumer.send(JSON.stringify({
+					from: user, 
+					cmd: "so " + message
 				}));
 			}
 		}
@@ -281,6 +335,8 @@ function connectToTwitch() {
 	var _command: CommandProcessor;
     // @ts-ignore
     ComfyJS.onCommand = ( user, command, message, flags, extra ) => {
+		console.log(user, command, message, flags, extra);
+
 		if (!_command) {
 			_command = new CommandProcessor(websocket);
 		}

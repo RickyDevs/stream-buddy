@@ -69,6 +69,7 @@ function onError(event: Event) {
 }
 
 function onMessage(event: MessageEvent) {
+    console.log(event.data, JSON.stringify(event.data));
     if ((typeof event.data == 'string') && _messageProcessor) {
 		_messageProcessor.onMessage(event.data);
     }

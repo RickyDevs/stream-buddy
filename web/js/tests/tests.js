@@ -31,7 +31,7 @@ var mockWebSocket = {
         this.animation = '';
         this.bubbleText = '';
         this.robotColor = '';
-        new BuddyMessageProcessor(new MockBuddyHandler(this)).onMessage(message);
+        new BuddyMessageProcessor(new MockBuddyHandler(this)).onMessage(String(message));
     }
 };
 var testUser = 'TestUser', robotCommand = 'robot';
@@ -41,8 +41,11 @@ var commandParameter = {
     Yes: 'yes',
     No: 'no',
     Punch: 'punch',
+    ThumbsUp: 'thumbsup',
     Jump: 'jump',
     Talk: 'talk ',
+    SO: 'so ',
+    Ola: 'ola ',
     Dance: 'dance',
     Walk: 'walk',
     Run: 'run',
@@ -79,6 +82,12 @@ QUnit.test("Simple punch, param: 'punch', expected 'Punch' animation", assert =>
     assert.equal(mockWebSocket.animation, "punch", "The animation should be 'punch' ");
     assert.equal(mockWebSocket.bubbleText, "", "The animation shouldn't have a bubble");
 });
+QUnit.test("Simple Thumbs up, param: 'thumbsup', expected 'thumbsup' animation", assert => {
+    new CommandProcessor(mockWebSocket)
+        .send(testUser, robotCommand, commandParameter.ThumbsUp);
+    assert.equal(mockWebSocket.animation, "thumbsup", "The animation should be 'thumbsup' ");
+    assert.equal(mockWebSocket.bubbleText, "", "The animation shouldn't have a bubble");
+});
 QUnit.test("Simple jump, param: 'jump', expected 'Jump' animation", assert => {
     new CommandProcessor(mockWebSocket)
         .send(testUser, robotCommand, commandParameter.Jump);
@@ -90,6 +99,33 @@ QUnit.test("Simple custom talk, param: 'talk ...', No animation expected", asser
         .send(testUser, robotCommand, commandParameter.Talk + 'This is a Test!');
     assert.equal(mockWebSocket.animation, "", "The animation should be '' ");
     assert.equal(mockWebSocket.bubbleText, "This is a Test!", "The animation should have a bubble");
+});
+QUnit.module('SO cmd');
+var soBubbleTextPrefix = 'Partilhem o apoio com o streamer <b>', soBubbleTextSufix = '</b>! Vão lá e façam follow!';
+QUnit.test("SO command , param: 'so name' without @, Thumbs Up animation expected", assert => {
+    new CommandProcessor(mockWebSocket)
+        .send(testUser, robotCommand, commandParameter.SO + testUser);
+    assert.equal(mockWebSocket.animation, "thumbsup", "The animation should be 'jump' ");
+    assert.equal(mockWebSocket.bubbleText, soBubbleTextPrefix + testUser + soBubbleTextSufix, "The animation should have a bubble");
+});
+QUnit.test("SO command , param: 'so name' with @, Thumbs Up animation expected", assert => {
+    new CommandProcessor(mockWebSocket)
+        .send(testUser, robotCommand, commandParameter.SO + "@" + testUser);
+    assert.equal(mockWebSocket.animation, "thumbsup", "The animation should be 'jump' ");
+    assert.equal(mockWebSocket.bubbleText, soBubbleTextPrefix + testUser + soBubbleTextSufix, "The animation should have a bubble");
+});
+QUnit.test("SO command direct, command 'so' param: 'name' with @, Thumbs Up animation expected", assert => {
+    new CommandProcessor(mockWebSocket)
+        .send(testUser, commandParameter.SO.trim(), "@" + testUser);
+    assert.equal(mockWebSocket.animation, "thumbsup", "The animation should be 'jump' ");
+    assert.equal(mockWebSocket.bubbleText, soBubbleTextPrefix + testUser + soBubbleTextSufix, "The animation should have a bubble");
+});
+var olaBubbleTextPrefix = 'Olá ', olaBubbleTextSufix = '!';
+QUnit.test("Olá command , param: 'ola name' with @, Wave animation expected", assert => {
+    new CommandProcessor(mockWebSocket)
+        .send(testUser, robotCommand, commandParameter.Ola + "@" + testUser);
+    assert.equal(mockWebSocket.animation, "wave", "The animation should be 'wave' ");
+    assert.equal(mockWebSocket.bubbleText, olaBubbleTextPrefix + testUser + olaBubbleTextSufix, "The animation should have a bubble");
 });
 QUnit.module('Long cmd');
 QUnit.test("Dance, param: 'dance', expected 'Dance' animation", assert => {

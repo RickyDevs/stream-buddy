@@ -52,6 +52,7 @@ function onError(event) {
     console.error('WS Error', event);
 }
 function onMessage(event) {
+    console.log(event.data, JSON.stringify(event.data));
     if ((typeof event.data == 'string') && _messageProcessor) {
         _messageProcessor.onMessage(event.data);
     }

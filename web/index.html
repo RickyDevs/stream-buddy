@@ -1,14 +1,21 @@
 
+<html>
+
+  <head>
+    <link type="text/css" rel="stylesheet" href="todo.css">
+    <link type="text/css" rel="stylesheet" href="bootstrap.css">
+  </head>
 <body>
   <script src="js/libs/comfy.js"></script>
+  <script src="js/libs/jquery-3.6.0.slim.js"></script>
   <script src="js/ctrl_main.js"></script>
 
   <div id="webSocketSupp" style="display:none;"> webSocket is Supported</div>
   <div id="connectedToTwitch" style="display:none;">Connected to twitch</div>
   <div id="echo">
-    <div id="echo-config" style="float: left;">
+    <div id="echo-config">
       <strong>Location:</strong><br>
-      <input class="draw-border" id="wsUri" size="35" value="ws://localhost:8080" >
+      <input class="draw-border" id="wsUri" size="35" value="ws://localhost:8081/ws" >
       <br>
       
       <button class="echo-button" id="connect" disabled="">Connect</button>
@@ -20,7 +27,7 @@
       <br>
       <button class="echo-button" id="send">Send</button>
     </div>
-    <div id="echo-log" style="float: left; margin-left: 20px; padding-left: 20px; width: 350px; border-left: solid 1px #cccccc;"> <strong>Log:</strong>
+    <div id="echo-log" style="margin-left: 20px; padding-left: 20px; width: 350px; border-left: solid 1px #cccccc;"> <strong>Log:</strong>
       <div id="consoleLog">
                 
         </div>
@@ -28,5 +35,105 @@
     </div>
   </div>
 
+  <br>
+
+  <!-- https://www.free-css.com/free-css-templates/page192/dashgum  -->
+  <div class="main-content">
+
+    <div class="col-md-9">
+      <section class="task-panel tasks-widget">
+        <div class="panel-heading">
+          <div class="pull-left">
+            <h5>Command List</h5>
+          </div>
+          <br>
+        </div>
+        <div class="panel-body">
+          <div class="task-content">
+            <ul id="command_list" class="task-list ui-sortable" style="min-width: 600px;">
+      <!--
+              <li class="list-primary"> 
+                <i class=" fa fa-ellipsis-v"></i>
+                <div class="task-checkbox">
+                  <input type="checkbox" class="list-child" value="">
+                </div>
+                <div class="task-title"> 
+                  <span class="task-title-sp">Dashgum - Admin Panel Theme</span> <span class="badge bg-theme">Done</span>
+                  <div class="pull-right hidden-phone">
+                    <button class="btn btn-success btn-xs fa fa-check"></button>
+                    <button class="btn btn-primary btn-xs fa fa-pencil"></button>
+                    <button class="btn btn-danger btn-xs fa fa-trash-o"></button>
+                  </div>
+                </div>
+              </li>
+              <li class="list-danger task-done" style="position: relative; left: 0px; top: 0px;"> <i class=" fa fa-ellipsis-v"></i>
+                <div class="task-checkbox">
+                  <input type="checkbox" class="list-child" value="">
+                </div>
+                <div class="task-title"> <span class="task-title-sp">Extensive collection of plugins</span> <span class="badge bg-warning">Cool</span>
+                  <div class="pull-right hidden-phone">
+                    <button class="btn btn-success btn-xs fa fa-check"></button>
+                    <button class="btn btn-primary btn-xs fa fa-pencil"></button>
+                    <button class="btn btn-danger btn-xs fa fa-trash-o"></button>
+                  </div>
+                </div>
+              </li>
+              <li class="list-success"> <i class=" fa fa-ellipsis-v"></i>
+                <div class="task-checkbox">
+                  <input type="checkbox" class="list-child" value="">
+                </div>
+                <div class="task-title"> <span class="task-title-sp">Free updates always, no extra fees.</span> <span class="badge bg-success">2 Days</span>
+                  <div class="pull-right hidden-phone">
+                    <button class="btn btn-success btn-xs fa fa-check"></button>
+                    <button class="btn btn-primary btn-xs fa fa-pencil"></button>
+                    <button class="btn btn-danger btn-xs fa fa-trash-o"></button>
+                  </div>
+                </div>
+              </li>
+              <li class="list-warning"> <i class=" fa fa-ellipsis-v"></i>
+                <div class="task-checkbox">
+                  <input type="checkbox" class="list-child" value="">
+                </div>
+                <div class="task-title"> <span class="task-title-sp">More features coming soon</span> <span class="badge bg-info">Tomorrow</span>
+                  <div class="pull-right hidden-phone">
+                    <button class="btn btn-success btn-xs fa fa-check"></button>
+                    <button class="btn btn-primary btn-xs fa fa-pencil"></button>
+                    <button class="btn btn-danger btn-xs fa fa-trash-o"></button>
+                  </div>
+                </div>
+              </li>
+              <li class="list-info"> <i class=" fa fa-ellipsis-v"></i>
+                <div class="task-checkbox">
+                  <input type="checkbox" class="list-child" value="">
+                </div>
+                <div class="task-title"> <span class="task-title-sp">Hey, seriously, you should buy this Dashboard</span> <span class="badge bg-important">Now</span>
+                  <div class="pull-right hidden-phone">
+                    <button class="btn btn-success btn-xs fa fa-check"></button>
+                    <button class="btn btn-primary btn-xs fa fa-pencil"></button>
+                    <button class="btn btn-danger btn-xs fa fa-trash-o"></button>
+                  </div>
+                </div>
+              </li>
+
+              -->
+
+            </ul>
+          </div>
+          <div class=" add-task-row"> 
+            <button class="btn btn-danger btn-sm pull-left" id="clear_command_list">Clear</button> 
+            
+            
+            <a class="btn btn-default btn-sm pull-right" href="todo_list.php#">See All Tasks</a> </div>
+        </div>
+      </section>
+    </div>
+
+
+
+  </div>
   
 </body>
+
+
+</html>
+
