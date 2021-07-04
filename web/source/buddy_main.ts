@@ -3,6 +3,8 @@
 import { initBuddy, fadeToActionAndRestore, isActionValid, rotateBy, changeColor } from './buddy_three.js';
 import { doConnect, MessageProcessor } from './buddy_ws.js';
 
+// Free tts  - https://freetts.com/Home/PlayAudio?Language%3Dpt-PT%26Voice%3DCristiano_Male%26TextMessage%3Dcatano%26id%3DCristiano%26type%3D1
+
 
 var wsBuddy = 'ws://192.168.1.18:8081/ws';
 
@@ -21,8 +23,17 @@ export class BuddyHandler {
 		console.log(cmd)
 		fadeToActionAndRestore(cmd, timeout);
 	}
-	showBubble(bubbleText: string, html?: boolean) {
-		var bubble = document.getElementById('buddy_bubble');
+	findBubbleByTextLen(len: number): string {
+		if (len > 80) {
+			return 'buddy_bubble_3lines';
+		}
+		if (len > 35) {
+			return 'buddy_bubble_2lines';
+		}
+		return 'buddy_bubble';
+	}
+	showBubble(bubbleText: string, html?: boolean, timeout?: number) {
+		var bubble = document.getElementById(this.findBubbleByTextLen(bubbleText.length));
 		if (html) {
 			bubble.innerHTML = bubbleText;
 		} else {
@@ -36,7 +47,7 @@ export class BuddyHandler {
 		setTimeout(function() {
 			console.log('hide hello', bubble.innerText)
 			bubble.style.opacity = "0";
-		}, 4000);
+		}, timeout > 0? timeout : 4000);
 	}
 
 	changeColor(color: string) {
@@ -103,9 +114,11 @@ export class BuddyMessageProcessor extends MessageProcessor {
 		}
 
 		if (cmd.startsWith('talk ')) {
-			var talkText = cmd.substr(5).trim();
+			const textLimit = 140, timePerLetter = 110, minTimeToShow = 4000;
+			var talkText = cmd.substr(5, textLimit).trim();
+			var time = Math.max(minTimeToShow, talkText.length * timePerLetter);
 			if ((talkText.length > 0) && !talkText.includes('<') && !talkText.includes('>')) {
-				this._buddyHandler.showBubble(talkText.substr(0,1).toUpperCase() + talkText.substr(1));
+				this._buddyHandler.showBubble(talkText.substr(0,1).toUpperCase() + talkText.substr(1), false, time);
 			}
 			return true;
 		}
@@ -115,7 +128,7 @@ export class BuddyMessageProcessor extends MessageProcessor {
 			if (soUser.length > 0) {
 				this._buddyHandler.fadeToActionAndRestore('thumbsup', 0.2);
 		
-				this._buddyHandler.showBubble(`Partilhem o apoio com o streamer <b>${soUser}</b>! Vão lá e façam follow!`, true);
+				this._buddyHandler.showBubble(`Partilhem o apoio com o streamer <b>${soUser}</b>! Vão lá e façam follow!`, true, 9000);
 			}
 			return true;
 		}

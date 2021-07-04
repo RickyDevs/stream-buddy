@@ -4,8 +4,16 @@
   <head>
     <link type="text/css" rel="stylesheet" href="todo.css">
     <link type="text/css" rel="stylesheet" href="bootstrap.css">
+    <title> Stream-Buddy Pagina de Comando</title>
   </head>
-<body>
+  <style>
+    body {
+     background-color: #222;
+     color: #aaa;
+    }
+  
+  </style>
+<body >
   <script src="js/libs/comfy.js"></script>
   <script src="js/libs/jquery-3.6.0.slim.js"></script>
   <script src="js/ctrl_main.js"></script>
@@ -25,7 +33,7 @@
       <strong>Message:</strong><br>
       <input class="draw-border" id="sendMessage" size="35" value="Rock it with HTML5 WebSocket">
       <br>
-      <button class="echo-button" id="send">Send</button>
+      <button class="echo-button" id="send">Send</button> <button class="echo-button" id="sendAd">Send Ad</button>
     </div>
     <div id="echo-log" style="margin-left: 20px; padding-left: 20px; width: 350px; border-left: solid 1px #cccccc;"> <strong>Log:</strong>
       <div id="consoleLog">
@@ -131,6 +139,10 @@
 
 
   </div>
+
+  <audio controls id="player" style="height: 100px;"> 
+    <source src="doorbell.mp3">
+  </audio>
   
 </body>
 

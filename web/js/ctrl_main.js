@@ -58,6 +58,8 @@ function echoHandlePageLoad() {
     };
     sendBut = document.getElementById('send');
     sendBut.onclick = doSend;
+    var sendButAd = document.getElementById('sendAd');
+    sendButAd.onclick = doSendAd;
     consoleLog = document.getElementById('consoleLog');
     clearLogBut = document.getElementById('clearLogBut');
     clearLogBut.onclick = clearLog;
@@ -140,6 +142,10 @@ function doDisconnect() {
 function doSend() {
     logTextToConsole('SENT: ' + sendMessage.value);
     websocket.send(sendMessage.value);
+}
+var __runAd;
+function doSendAd() {
+    __runAd();
 }
 function logTextToConsole(text) {
     console.log(text);
@@ -267,7 +273,17 @@ class CommandProcessor {
     }
 }
 function connectToTwitch() {
+    var _nextDoorbell = 0;
     var _command;
+    function runAd() {
+        if (!_command) {
+            _command = new CommandProcessor(websocket);
+        }
+        var message = "Queres Ajudar o canal de forma gratuita? Escreve /host rickydevs no chat do TEU canal para dar host a este streamer. Obrigado!";
+        _command.send('', 'robot', 'talk ' + message, undefined, undefined);
+        logTextToConsole('SENT: ' + message);
+    }
+    __runAd = runAd;
     // @ts-ignore
     ComfyJS.onCommand = (user, command, message, flags, extra) => {
         console.log(user, command, message, flags, extra);
@@ -276,6 +292,20 @@ function connectToTwitch() {
         }
         _command.send(user, command, message, flags, extra);
         logTextToConsole('SENT: ' + message);
+    };
+    // @ts-ignore
+    ComfyJS.onChat = function (user, message, flags, self, extra) {
+        if (user == 'SoundAlerts') {
+            return;
+        }
+        var now = Date.now();
+        if (_nextDoorbell < now) {
+            var player = $('audio#player');
+            player[0].play();
+            console.log('doorbell com' + user);
+            setTimeout(runAd, 60 * 1000);
+        }
+        _nextDoorbell = now + (3 * 60 * 1000);
     };
     // @ts-ignore
     ComfyJS.onConnected = function (address, port, isFirstConnect) {

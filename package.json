@@ -9,11 +9,14 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "mime-types": "^2.1.31",
+    "pure-http": "^3.3.0",
     "three": "^0.129.0",
     "ws": "^7.4.6"
   },
   "devDependencies": {
     "@types/jquery": "^3.5.5",
+    "@types/mime-types": "^2.1.0",
     "@types/node": "^15.6.1",
     "@types/qunit": "^2.11.1",
     "@types/three": "^0.128.0",
